@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    />
+    <title>AutoReadme</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <header class="brand">
+          <div class="brand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <line x1="10" y1="9" x2="8" y2="9" />
+            </svg>
+          </div>
+          <div>
+            <h1>AutoReadme</h1>
+            <p>Documenta tu proyecto en segundos</p>
+          </div>
+        </header>
+
+        <section class="card">
+          <h2 class="card-title">1. Elige tu proyecto</h2>
+          <button id="drop-zone" type="button" class="drop-zone">
+            <span class="drop-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+            </span>
+            <span class="drop-title">Seleccionar carpeta</span>
+            <span class="drop-hint">Abre el explorador y elige la raíz de tu proyecto</span>
+          </button>
+          <p id="folder-path" class="folder-path hidden"></p>
+        </section>
+
+        <section id="project-card" class="card project-card hidden">
+          <h2 class="card-title">Proyecto detectado</h2>
+          <div class="project-name" id="project-name">—</div>
+          <p class="project-desc" id="project-desc"></p>
+          <div class="chips" id="project-chips"></div>
+        </section>
+
+        <section class="card">
+          <h2 class="card-title">2. Personaliza</h2>
+
+          <div class="field">
+            <span class="field-label">Idioma del README</span>
+            <div class="segmented" role="group" aria-label="Idioma">
+              <button type="button" class="segment active" data-lang="es">Español</button>
+              <button type="button" class="segment" data-lang="en">English</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="depth">
+              Profundidad del árbol
+              <span id="depth-value" class="field-value">3</span>
+            </label>
+            <input id="depth" type="range" min="1" max="6" value="3" />
+          </div>
+
+          <div class="toggles">
+            <label class="toggle">
+              <input id="opt-tree" type="checkbox" checked />
+              <span class="toggle-track"></span>
+              <span class="toggle-text">Incluir estructura de carpetas</span>
+            </label>
+            <label class="toggle">
+              <input id="opt-scripts" type="checkbox" checked />
+              <span class="toggle-track"></span>
+              <span class="toggle-text">Incluir scripts y comandos</span>
+            </label>
+            <label class="toggle">
+              <input id="opt-footer" type="checkbox" checked />
+              <span class="toggle-track"></span>
+              <span class="toggle-text">Añadir pie de página</span>
+            </label>
+            <label class="toggle toggle-warn">
+              <input id="opt-force" type="checkbox" />
+              <span class="toggle-track"></span>
+              <span class="toggle-text">Sobrescribir sin backup</span>
+            </label>
+            <label class="toggle toggle-ai">
+              <input id="opt-ai" type="checkbox" />
+              <span class="toggle-track"></span>
+              <span class="toggle-text">Mejorar con IA (OpenAI) — obligatorio activar</span>
+            </label>
+          </div>
+
+          <div id="ai-settings" class="ai-settings hidden">
+            <div class="field">
+              <label class="field-label" for="ai-provider">Proveedor de IA</label>
+              <select id="ai-provider">
+                <option value="openai">OpenAI (requiere créditos)</option>
+                <option value="ollama">Ollama — gratis en tu PC</option>
+              </select>
+            </div>
+            <div id="openai-settings">
+              <label class="field-label" for="api-key">API key de OpenAI</label>
+              <input
+                id="api-key"
+                type="password"
+                placeholder="sk-... (o usa OPENAI_API_KEY)"
+                autocomplete="off"
+              />
+              <p id="api-key-hint" class="field-hint"></p>
+            </div>
+            <div id="ollama-settings" class="hidden">
+              <p class="field-hint">
+                Instala <strong>Ollama</strong> (ollama.com), ejecuta
+                <code>ollama pull llama3.2</code> y déjalo en marcha. No necesitas API key.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div class="sidebar-actions">
+          <button id="btn-preview" type="button" class="btn btn-ghost" disabled>
+            Vista previa
+          </button>
+          <button id="btn-generate" type="button" class="btn btn-primary" disabled>
+            Generar README.md
+          </button>
+        </div>
+      </aside>
+
+      <main class="preview-area">
+        <header class="preview-toolbar">
+          <div>
+            <h2>Vista previa</h2>
+            <p id="preview-subtitle">Selecciona un proyecto para ver el README generado</p>
+            <span id="ai-badge" class="ai-badge hidden"></span>
+          </div>
+          <div class="tab-group" role="tablist">
+            <button
+              id="tab-rendered"
+              type="button"
+              class="tab active"
+              role="tab"
+              aria-selected="true"
+            >
+              Formato
+            </button>
+            <button id="tab-source" type="button" class="tab" role="tab" aria-selected="false">
+              Markdown
+            </button>
+          </div>
+        </header>
+
+        <div id="empty-state" class="empty-state">
+          <div class="empty-illustration" aria-hidden="true">
+            <svg viewBox="0 0 120 120" fill="none">
+              <rect x="20" y="16" width="72" height="88" rx="8" stroke="currentColor" stroke-width="2" />
+              <line x1="32" y1="36" x2="80" y2="36" stroke="currentColor" stroke-width="2" />
+              <line x1="32" y1="52" x2="68" y2="52" stroke="currentColor" stroke-width="2" />
+              <line x1="32" y1="68" x2="76" y2="68" stroke="currentColor" stroke-width="2" />
+              <line x1="32" y1="84" x2="56" y2="84" stroke="currentColor" stroke-width="2" />
+            </svg>
+          </div>
+          <h3>Tu README aparecerá aquí</h3>
+          <p>Elige una carpeta a la izquierda y pulsa <strong>Vista previa</strong> para ver el resultado antes de guardarlo.</p>
+        </div>
+
+        <article id="preview-rendered" class="preview-content hidden" aria-live="polite"></article>
+        <textarea
+          id="preview-source"
+          class="preview-source hidden"
+          readonly
+          spellcheck="false"
+        ></textarea>
+
+        <div id="loading" class="loading hidden" aria-live="polite">
+          <div class="spinner"></div>
+          <span>Analizando proyecto…</span>
+        </div>
+      </main>
+    </div>
+
+    <footer class="status-bar">
+      <span id="status-text">Listo. Empieza seleccionando una carpeta.</span>
+    </footer>
+
+    <div id="toast" class="toast hidden" role="status"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
